@@ -1,4 +1,5 @@
-'''=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+"""
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # File Name: tfli2c_test.py
 # Inception: 12 JUL 2021
 # Developer: Bud Ryerson
@@ -46,29 +47,28 @@
 #
 # 'tmli2c' does not work in Windows because required
 # 'smbus' module only works in Linux/Raspian/MacOS
-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-'''
-
-#  Skip a line and say 'Hello!'
-print( "\n\r" + "tfli2c_test.py" +\
-       "\n\r" + "19JUL2021")
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+"""
 
 import time
 import sys
 import tfli2c as tfl    # Import `tfli2c` module v0.0.1
 
-#I2CPort = 0     # I2C(0), /dev/i2c-0, GPIO 0/1, pins 27/28
-I2CPort = 4      # I2C(4), /dev/i2c-4, GPIO 8/9, pins 24/21
-I2CAddr = 0x10   # Device address in Hex, Decimal 16
+# I2CPort = 0     # I2C(0), /dev/i2c-0, GPIO 0/1, pins 27/28
+i2c_port = 1      # I2C(4), /dev/i2c-4, GPIO 8/9, pins 24/21
+i2c_addr = 0x10   # Device address in Hex, Decimal 16
 
 # - - - -  Set and Test I2C communication  - - - -
 #  This function is needed to set the I2C port and
 #  address values, and to test those settings.
 # - - - - - - - - - - - - - - - - - - - - - - - - -
-if( tfl.begin( I2CAddr, I2CPort)):
-    print( "I2C mode: ready")
-else:
-    print( "I2C mode: not ready")
-    sys.exit()   #  quit the program if I2C bus not ready
+try:
+    connexion1 = tfl.Lidar(i2c_addr, i2c_port)
+    print("I2C mode: ready")
+except OSError:
+    print("I2C mode: not ready")
+    sys.exit()  # quit the program if I2C bus not ready
+
 #  - - - - - - - - - - - - - - - - - - - - - - - -'''
 
 #  - - - - - -  Miscellaneous commands  - - - - - - -
@@ -78,25 +78,25 @@ else:
 # - - - - - - - - - - - - - - - - - - - - - - - - -
 #
 #  - - Perform a system reset - - - - - - - -
-print( "System reset: ", end = '')
-tfl.softReset()
+print("System reset: ", end='')
+connexion1.soft_reset()
 time.sleep(0.5)  # allow 500ms for reset to complete
-print( "complete")
+print("complete")
 #
 #  - - Get and Display the firmware version - - - - - - -
-print( "Firmware version: " + tfl.getFirmwareVersion())
+print("Firmware version: " + connexion1.get_firmware_version())
 #
 #  - - Get and display Serial Number - - - - - - -
-print( "Production Code: " + tfl.getProdCode())
+print("Production Code: " + connexion1.get_prod_code())
 #
 #  - -  Set and display Trigger Mode  - - - - - -
-tfl.setModeTrig()
-print( "Sample Mode: " + tfl.getMode())
+connexion1.set_mode_trig()
+print("Sample Mode: " + connexion1.get_mode())
 #
 #  - - -  Set Frame Rate to 20fps  - - - - -
 #  - - -  and display Frame Rate   - - - - -
-tfl.setFrameRate( 20)
-print( "Sample Rate: " + str(tfl.getFrameRate()))
+connexion1.set_frame_rate(20)
+print("Sample Rate: " + str(connexion1.get_frame_rate()))
 #  - - - - - - - - - - - - - - - - - - - - - - - -
 #
 time.sleep(0.5)     # Wait half a second.
@@ -114,38 +114,38 @@ while tfAttempt < 3:
         #  Loop until exception occurs
         while True:
             time.sleep(0.047)   # Add 47ms delay for 20Hz loop-rate
-            #  - - - - - - - - - - - - - - - - - - - - - - - - -            
+            #  - - - - - - - - - - - - - - - - - - - - - - - - -
             #  This line of code:
             #      print( f"{value:0{padding}}", end = '')
             #  formats 'value' as a decimal number padded with 0s
             #  to the length of 'padding' and no CR/LF at the end.
             #  - - - - - - - - - - - - - - - - - - - - - - - - -
             #  Display three main data values from the device.
-            if tfl.getData():
+            if connexion1.get_data():
                 # Display distance in centimeters,
-                print( f"Dist:{tfl.dist:{4}}cm", end= " | ")
+                print(f"Dist:{connexion1.dist:{4}}cm", end=" | ")
                 # display signal-strength or quality,
-                print( f"Flux:{tfl.flux:{6}d}",  end= " | ")
+                print(f"Flux:{connexion1.flux:{6}d}", end=" | ")
                 # and display temperature in Centigrade.
-                print( f"Temp:{tfl.temp:{3}}°C",  )
+                print(f"Temp:{connexion1.temp:{3}}°C")
             else:                  # If the command fails...
-                tfl.printStatus()  # display the error status
+                connexion1.print_status()  # display the error status
     #
     #  Use control-C to break loop.
     except KeyboardInterrupt:
-        print( 'Keyboard Interrupt')
+        print('Keyboard Interrupt')
         break
     #
     #  Catch all other exceptions.
-    except:
-        eType = sys.exc_info()[0]  #  Return exception type
-        print( eType)
+    except OSError:
+        eType = sys.exc_info()[0]  # Return exception type
+        print(eType)
         tfAttempt += 1
-        print( "Attempts: " + str(tfAttempt))
-        time.sleep(2.0)     #  Wait two seconds and retry.
+        print("Attempts: " + str(tfAttempt))
+        time.sleep(2.0)     # Wait two seconds and retry.
 #
-print( "That's all folks!") #  Say "Goodbye!"
-sys.exit()                  #  Clean up the OS and exit.
+print("That's all folks!")  # Say "Goodbye!"
+sys.exit()                  # Clean up the OS and exit.
 #
 # - - - - - -  the main program loop ends here  - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

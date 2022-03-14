@@ -19,45 +19,43 @@
 #
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-'''
 
-#  Skip a line and say 'Hello!'
-print( "\n\r" + "tfli2c_simple.py" +\
-       "\n\r" + "17JUL2021")
-
-import time             #  Needed for 'sleep' function
+import time  # Needed for 'sleep' function
 import sys
-import tfli2c as tfl    #  Import `tfli2c` module v0.0.1
+import tfli2c as tfl  # Import `tfli2c` module v0.0.1
 
 #   - - -  Set I2C Port and Address numbers  - - - - - - - -
-I2CAddr = 0x10   # Device address in Hex, Decimal 16
-I2CPort = 4      # I2C(4), /dev/i2c-4, GPIO 8/9, pins 24/21
+i2c_addr = 0x10  # Device address in Hex, Decimal 16
+i2c_port = 1  # I2C(1), /dev/i2c-1, GPIO 2/3, pins 3/5
 
 #  - - -  Initalize module and device - - -
-if( tfl.begin( I2CAddr, I2CPort)):
-    print( "Ready")
-else:
-    print( "Not ready")
-    sys.exit()   #  quit the program if not ready
+try:
+    connexion1 = tfl.Lidar(i2c_addr, i2c_port)
+    print("Ready")
+except OSError:
+    print("Not ready")
+    sys.exit()  # quit the program if not ready
 
 #  - - - -  Loop until an exception occurs  - - - - -
 while True:
     try:
-        time.sleep(0.05)   # Delay 50ms for 20Hz loop-rate
-        tfl.getData()      # Get tfl data
-        print( tfl.dist)   # display distance
+        time.sleep(0.05)  # Delay 50ms for 20Hz loop-rate
+        connexion1.get_data()  # Get tfl data
+        print(connexion1.dist)  # display distance
     #
     #  Use control-C to break loop
     except KeyboardInterrupt:
-        print( 'Keyboard Interrupt')
+        print('Keyboard Interrupt')
         break
     #
+    '''
     #  Catch all other exceptions
-    except:
+    except Exception:
         eType = sys.exc_info()[0]  # Return exception type
-        print( eType)
+        print(eType)
         break
+    '''
 #
-print( "That's all folks!") # Say "Goodbye!"
-sys.exit()                  # Clean up the OS and exit.
+print("That's all folks!")  # Say "Goodbye!"
+sys.exit()  # Clean up the OS and exit.
 #
 #  - - - - -  Everything ends here  - - - - - -
-
